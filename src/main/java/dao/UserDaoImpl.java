@@ -1,19 +1,23 @@
-package repository;
+package dao;
 
 import model.User;
 import org.springframework.stereotype.Repository;
-import javax.persistence.*;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import java.util.Collections;
 import java.util.List;
 
 @Repository
-public class UserRepositoryImpl implements UserRepository {
+public class UserDaoImpl implements UserDao {
 
     @PersistenceContext
     private EntityManager em;
 
     @Override
     public List<User> findAll() {
-        return em.createQuery("from User", User.class).getResultList();
+        List<User> users = em.createQuery("from User", User.class).getResultList();
+        return users != null ? users : Collections.emptyList();
     }
 
     @Override

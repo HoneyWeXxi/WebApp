@@ -1,8 +1,8 @@
 package config;
 
+import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -11,7 +11,7 @@ import javax.sql.DataSource;
 import java.util.Properties;
 
 @Configuration
-@ComponentScan(basePackages = {"repository", "service"})
+@ComponentScan(basePackages = {"dao", "service"})
 @PropertySource("classpath:db.properties")
 @EnableTransactionManagement
 public class AppConfig {
@@ -39,12 +39,14 @@ public class AppConfig {
 
     @Bean
     public DataSource dataSource() {
-        DriverManagerDataSource ds = new DriverManagerDataSource();
-        ds.setDriverClassName(driver);
-        ds.setUrl(url);
-        ds.setUsername(username);
-        ds.setPassword(password);
-        return ds;
+        HikariDataSource dataSource = new HikariDataSource();
+        dataSource.setJdbcUrl(url);
+        dataSource.setUsername(username);
+        dataSource.setPassword(password);
+        dataSource.setDriverClassName(driver);
+        dataSource.setMaximumPoolSize(10);
+        dataSource.setMinimumIdle(5);
+        return dataSource;
     }
 
     @Bean
@@ -52,12 +54,10 @@ public class AppConfig {
         LocalSessionFactoryBean factory = new LocalSessionFactoryBean();
         factory.setDataSource(dataSource());
         factory.setPackagesToScan("model");
-
         Properties props = new Properties();
         props.put("hibernate.dialect", hibernateDialect);
         props.put("hibernate.show_sql", showSql);
         props.put("hibernate.hbm2ddl.auto", hbm2ddlAuto);
-
         factory.setHibernateProperties(props);
         return factory;
     }

@@ -1,6 +1,7 @@
 package model;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @Table(name = "users")
@@ -14,7 +15,6 @@ public class User {
 
     private String email;
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -23,4 +23,32 @@ public class User {
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+
+    public String validate() {
+        if (name == null || name.trim().isEmpty()) {
+            return "Name must not be empty";
+        }
+        if (email == null || email.trim().isEmpty()) {
+            return "Email must not be empty";
+        }
+        if (!email.contains("@")) {
+            return "Email must contain @";
+        }
+        return null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof User)) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id) &&
+                Objects.equals(name, user.name) &&
+                Objects.equals(email, user.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, email);
+    }
 }

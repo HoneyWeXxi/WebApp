@@ -1,9 +1,9 @@
 package service;
 
+import dao.UserDao;
 import model.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import repository.UserRepository;
 
 import java.util.List;
 
@@ -11,34 +11,57 @@ import java.util.List;
 @Transactional
 public class UserServiceImpl implements UserService {
 
-    private final UserRepository repo;
+    private final UserDao userDao;
 
-    public UserServiceImpl(UserRepository repo) {
-        this.repo = repo;
+    public UserServiceImpl(UserDao userDao) {
+        this.userDao = userDao;
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<User> getAllUsers() {
-        return repo.findAll();
+        return userDao.findAll();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public User getUser(Long id) {
-        return repo.findById(id);
+        if (id == null) {
+            throw new IllegalArgumentException("ID must not be null");
+        }
+        return userDao.findById(id);
     }
 
+    @Transactional
     @Override
     public void saveUser(User user) {
-        repo.save(user);
+        checkUserValid(user);
+        userDao.save(user);
     }
 
+    @Transactional
     @Override
     public void updateUser(User user) {
-        repo.update(user);
+        checkUserValid(user);
+        userDao.update(user);
     }
 
+    @Transactional
     @Override
     public void deleteUser(Long id) {
-        repo.delete(id);
+        if (id == null) {
+            throw new IllegalArgumentException("ID must not be null");
+        }
+        userDao.delete(id);
+    }
+
+    private void checkUserValid(User user) {
+        if (user == null) {
+            throw new IllegalArgumentException("User must not be null");
+        }
+        String validationError = user.validate();
+        if (validationError != null) {
+            throw new IllegalArgumentException(validationError);
+        }
     }
 }

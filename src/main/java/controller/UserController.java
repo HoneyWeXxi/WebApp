@@ -29,21 +29,34 @@ public class UserController {
     }
 
     @PostMapping("/add")
-    public String addUser(@ModelAttribute User user) {
-        service.saveUser(user);
-        return "redirect:/users";
+    public String addUser(@ModelAttribute User user, Model model) {
+        try {
+            service.saveUser(user);
+            return "redirect:/users";
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("user", user);
+            return "addUser";
+        }
     }
 
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable Long id, Model model) {
-        model.addAttribute("user", service.getUser(id));
+        User user = service.getUser(id);
+        model.addAttribute("user", user);
         return "editUser";
     }
 
     @PostMapping("/edit")
-    public String editUser(@ModelAttribute User user) {
-        service.updateUser(user);
-        return "redirect:/users";
+    public String editUser(@ModelAttribute User user, Model model) {
+        try {
+            service.updateUser(user);
+            return "redirect:/users";
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("user", user);
+            return "editUser";
+        }
     }
 
     @GetMapping("/delete/{id}")
